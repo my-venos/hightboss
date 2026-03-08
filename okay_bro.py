@@ -73,8 +73,8 @@ async def login_and_get_token(session: aiohttp.ClientSession):
     global CURRENT_TOKEN
     print("🔐 အကောင့်ထဲသို့ Login ဝင်နေပါသည်...")
     json_data = {
-        'username': USERNAME, 
-        'pwd': PASSWORD,
+        'username': '959675323878',
+        'pwd': 'Mitheint11',
         'phonetype': 1,
         'logintype': 'mobile',
         'packId': '',
