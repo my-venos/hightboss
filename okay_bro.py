@@ -175,9 +175,9 @@ async def check_game_and_predict(session: aiohttp.ClientSession):
                 history_docs.reverse()
                 all_history = [doc["size"] for doc in history_docs]
                 
-                MAX_PATTERN_LENGTH = 10
-                MIN_PATTERN_LENGTH = 3
-                pattern_found = False
+                MAX_PATTERN_LENGTH = 9
+                MIN_PATTERN_LENGTH = 9
+                pattern_found = True
                 
                 for current_len in range(MAX_PATTERN_LENGTH, MIN_PATTERN_LENGTH - 1, -1):
                     if len(all_history) > current_len:
