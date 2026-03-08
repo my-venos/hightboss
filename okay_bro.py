@@ -68,16 +68,16 @@ async def login_and_get_token(session: aiohttp.ClientSession):
     
     # ⚠️ အသေချာဆုံး မူရင်း Login Payload
     json_data = {
-        'username': '959680090540',
+        'username': '959675323878',
         'pwd': 'Mitheint11',
         'phonetype': 1,
         'logintype': 'mobile',
         'packId': '',
         'deviceId': '51ed4ee0f338a1bb24063ffdfcd31ce6',
         'language': 7,
-        'random': '87f226ed2caa47dbabae1764c9c3958c',
-        'signature': '5127867D3DE7581DE6D36591BF3FBA22',
-        'timestamp': 1772987092,
+        'random': '4e86f1169a6649e092d65783f0deb7cf',
+        'signature': 'E8234ABD065A1FBA0214FD1CC47183EB',
+        'timestamp': 1772989638,
     }
     try:
         async with session.post('https://api.bigwinqaz.com/api/webapi/Login', headers=BASE_HEADERS, json=json_data) as response:
