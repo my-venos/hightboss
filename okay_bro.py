@@ -136,7 +136,6 @@ async def check_game_and_predict(session: aiohttp.ClientSession):
         'signature': '7D26EE375971781D1BC58B7039B409B7',
         'timestamp': 1772985040,
     }
-
     try:
         async with session.post('https://api.bigwinqaz.com/api/webapi/GetNoaverageEmerdList', headers=headers, json=json_data) as response:
             data = await response.json()
@@ -175,6 +174,11 @@ async def check_game_and_predict(session: aiohttp.ClientSession):
                 history_docs.reverse()
                 all_history = [doc["size"] for doc in history_docs]
                 
+                # ⚠️ [ERROR FIX] UnboundLocalError မတက်စေရန် အခြေခံတန်ဖိုးများကို ကြိုတင်သတ်မှတ်ထားခြင်း
+                predicted = "BIG (အကြီး) 🔴"
+                base_prob = 55.0
+                reason = "Pattern အသစ်ဖြစ်နေသဖြင့် သမိုင်းကြောင်းအရ တွက်ချက်ထားသည်"
+                
                 MAX_PATTERN_LENGTH = 9
                 MIN_PATTERN_LENGTH = 9
                 pattern_found = True
@@ -197,14 +201,18 @@ async def check_game_and_predict(session: aiohttp.ClientSession):
                             pattern_str = "-".join(recent_pattern).replace('BIG', 'B').replace('SMALL', 'S')
                             
                             if big_prob > small_prob:
-                                predicted, base_prob = "BIG (အကြီး) 🔴", big_prob
+                                predicted = "BIG (အကြီး) 🔴"
+                                base_prob = big_prob
                                 reason = f"[{pattern_str}] လာလျှင် အကြီးဆက်ထွက်လေ့ရှိ၍"
                             elif small_prob > big_prob:
-                                predicted, base_prob = "SMALL (အသေး) 🟢", small_prob
+                                predicted = "SMALL (အသေး) 🟢"
+                                base_prob = small_prob
                                 reason = f"[{pattern_str}] လာလျှင် အသေးဆက်ထွက်လေ့ရှိ၍"
                             else:
-                                predicted, base_prob = "BIG (အကြီး) 🔴", 50.0
+                                predicted = "BIG (အကြီး) 🔴"
+                                base_prob = 50.0
                                 reason = f"[{pattern_str}] အရင်က မျှခြေထွက်ဖူး၍ အကြီးရွေးထားသည်"
+                            
                             pattern_found = True
                             break 
                             
@@ -212,9 +220,7 @@ async def check_game_and_predict(session: aiohttp.ClientSession):
                     predicted = "BIG (အကြီး) 🔴" if all_history.count("SMALL") > all_history.count("BIG") else "SMALL (အသေး) 🟢"
                     base_prob = 55.0
                     reason = "Pattern အသစ်ဖြစ်နေသဖြင့် သမိုင်းကြောင်းအရ တွက်ချက်ထားသည်"
-
                 final_prob = min(round(base_prob, 1), 85.0)
-
                 LAST_PREDICTED_ISSUE = next_issue
                 LAST_PREDICTED_RESULT = "BIG" if "BIG" in predicted else "SMALL"
                 
