@@ -74,8 +74,9 @@ async def login_and_get_token(session: aiohttp.ClientSession):
     global CURRENT_TOKEN
     print("🔐 အကောင့်ထဲသို့ Login ဝင်နေပါသည်...")
     json_data = {
-        'username': USERNAME,
-        'pwd': PASSWORD,
+        json_data = {
+        'username': '959680090540',
+        'pwd': 'Mitheint11',
         'phonetype': 1,
         'logintype': 'mobile',
         'packId': '',
@@ -83,7 +84,7 @@ async def login_and_get_token(session: aiohttp.ClientSession):
         'language': 7,
         'random': 'd85ed31c80a9447d9c2eb8e713b6046d',
         'signature': 'EAEF4EF352C07BF7852E39B5AB2F4151',
-        'timestamp': int(time.time()), 
+        'timestamp': 1772969564,
     }
     try:
         async with session.post('https://api.bigwinqaz.com/api/webapi/Login', headers=BASE_HEADERS, json=json_data) as response:
