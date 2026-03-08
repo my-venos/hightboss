@@ -80,8 +80,8 @@ async def login_and_get_token(session: aiohttp.ClientSession):
         'packId': '',
         'deviceId': '51ed4ee0f338a1bb24063ffdfcd31ce6',
         'language': 7,
-        'random': 'd85ed31c80a9447d9c2eb8e713b6046d',
-        'signature': 'EAEF4EF352C07BF7852E39B5AB2F4151',
+        'random': '619b92ba43a94519a38e8bbaaf4de869',
+        'signature': '5112260FF926BB83C51DF46D45E8F859',
         'timestamp': int(time.time()),
     }
 
