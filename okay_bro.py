@@ -82,7 +82,7 @@ async def login_and_get_token(session: aiohttp.ClientSession):
         'language': 7,
         'random': '619b92ba43a94519a38e8bbaaf4de869',
         'signature': '5112260FF926BB83C51DF46D45E8F859',
-        'timestamp': int(time.time()),
+        'timestamp': 1772975412,
     }
 
     try:
