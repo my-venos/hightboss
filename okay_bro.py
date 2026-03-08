@@ -73,8 +73,10 @@ async def init_db():
 async def login_and_get_token(session: aiohttp.ClientSession):
     global CURRENT_TOKEN
     print("🔐 အကောင့်ထဲသို့ Login ဝင်နေပါသည်...")
+    
+    print("🔐 အကောင့်ထဲသို့ Login ဝင်နေပါသည်...")
+    
     json_data = {
-        json_data = {
         'username': '959680090540',
         'pwd': 'Mitheint11',
         'phonetype': 1,
