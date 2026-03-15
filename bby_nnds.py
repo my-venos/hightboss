@@ -180,7 +180,6 @@ class MetaOptimizer:
         self.weights = {'rf': 0.30, 'gb': 0.25, 'markov': 0.20, 'pattern': 0.25}
 
     def learn_from_result(self, actual: str, past_preds: dict):
-        # 💡 [FIXED] past_preds မရှိပါက (အလွတ်ဖြစ်နေပါက) ကျော်သွားမည်
         if not past_preds:
             return
 
@@ -192,7 +191,6 @@ class MetaOptimizer:
                 self.weights[model] = max(0.05, self.weights[model] - 0.03)
             total_w += self.weights[model]
             
-        # 💡 [FIXED] 0 ဖြင့် စားမိခြင်းကို ကာကွယ်ထားသည်
         if total_w > 0:
             for k in self.weights:
                 self.weights[k] /= total_w
@@ -238,7 +236,6 @@ class UltimateAIEngine:
         final_pred = "BIG" if score_b > score_s else "SMALL"
         total_score = score_b + score_s
         
-        # 💡 [FIXED] Total Score သုညဖြစ်နေပါက (Error ဖြစ်ပါက) 50% သတ်မှတ်မည်
         raw_conf = (max(score_b, score_s) / total_score * 100) if total_score > 0 else 50.0
         confidence = min(max(raw_conf, 51.0), 99.0)
         
@@ -356,9 +353,10 @@ class GameController:
                         # Self Learning Update
                         self.ai.optimizer.learn_from_result(size, self.ai.last_predictions)
                         
-                        recent_preds = await self.db.get_recent_predictions(1)
-                        if recent_preds and recent_preds[0]['issue_number'] == issue:
-                            pred_doc = recent_preds[0]
+                        # 💡 [FIXED] ဒီနေရာမှာ Database မှ ယခင်ခန့်မှန်းချက်ကို တိုက်ရိုက်ရှာဖွေမည်
+                        pred_doc = await self.db.predictions.find_one({"issue_number": issue})
+                        
+                        if pred_doc and pred_doc.get('predicted_size'):
                             predicted_size = pred_doc['predicted_size']
                             is_win = (predicted_size == size)
                             win_lose_db = "WIN" if is_win else "LOSE"
