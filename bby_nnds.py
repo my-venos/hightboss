@@ -300,7 +300,13 @@ class GameController:
         self.current_step = 1
 
     async def fetch_lottery_data(self, session: aiohttp.ClientSession) -> dict:
-        json_data = {'pageSize': 1, 'pageNo': 1, 'typeId': 1, 'language': 7, 'random': '1234', 'signature': 'ABCD', 'timestamp': int(time.time())}
+        # 💡 [FIXED] မှန်ကန်သော Signature နှင့် Random ကုဒ်များကို ပြန်ထည့်ထားပါသည်
+        json_data = {
+            'pageSize': 10, 'pageNo': 1, 'typeId': 1, 'language': 7, 
+            'random': '736ea5fe7d1744008714320d2cfbbed4', 
+            'signature': '9BE5D3A057D1938B8210BA32222A993C', 
+            'timestamp': int(time.time())
+        }
         for _ in range(3):
             try:
                 async with session.post(Config.API_URL, headers=Config.HEADERS, json=json_data, timeout=3.0) as r:
@@ -332,7 +338,6 @@ class GameController:
                         self.last_issue = issue
                         recent_preds = await self.db.get_recent_predictions(10)
                         
-                        # Streak ကို DB မှ ပြန်ယူခြင်း
                         self.lose_streak = 0
                         for p in recent_preds:
                             if p.get("win_lose") == "LOSE": self.lose_streak += 1
@@ -353,7 +358,6 @@ class GameController:
                     if int(issue) > int(self.last_issue):
                         await self.db.save_history(issue, number, size, parity)
                         
-                        # Self-Learning Update
                         self.ai.optimizer.learn_from_result(size, self.ai.last_predictions)
                         
                         recent_preds = await self.db.get_recent_predictions(1)
@@ -366,7 +370,6 @@ class GameController:
                             await self.db.update_result(issue, size, number, win_lose_db)
                             await self.ui.send_result(issue, predicted_size, self.current_step, is_win, size, number)
                             
-                            # Streak ပြင်ဆင်ခြင်း
                             if is_win: self.lose_streak = 0
                             else: 
                                 self.lose_streak += 1
