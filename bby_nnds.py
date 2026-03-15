@@ -24,7 +24,6 @@ warnings.filterwarnings("ignore")
 # ==========================================
 load_dotenv()
 
-# Logging စနစ်ကို ဖွင့်ခြင်း (Print အစား အဆင့်မြင့်စနစ်)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,13 +35,11 @@ class Config:
     CHANNEL_ID = os.getenv("CHANNEL_ID")
     MONGO_URI = os.getenv("MONGO_URI")
     
-    WIN_STICKER = ""  # ဥပမာ: "CAACAgUAAxkBAAE..."
+    WIN_STICKER = ""  
     LOSE_STICKER = "" 
     
-    # Custom Multiplier Strategy (1x, 2x, 3x, 4x, 5x, 6x...)
     MULTIPLIERS = [1, 2, 3, 5, 8, 15, 30, 50]
     
-    # API Headers
     API_URL = 'https://6lotteryapi.com/api/webapi/GetNoaverageEmerdList'
     HEADERS = {
         'authority': '6lotteryapi.com', 'accept': 'application/json, text/plain, */*',
@@ -50,7 +47,6 @@ class Config:
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     }
 
-# 💡 [FIXED] Bot နှင့် Dispatcher ကို မှန်ကန်စွာ ဖန်တီးထားပါသည်
 bot = Bot(token=Config.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
@@ -58,7 +54,6 @@ dp = Dispatcher()
 # 🗄️ MODULE 2: DATABASE MANAGER
 # ==========================================
 class DatabaseManager:
-    """ MongoDB သို့ ချိတ်ဆက်ခြင်းနှင့် မှတ်တမ်းများကို စီမံခန့်ခွဲခြင်း """
     def __init__(self, uri: str):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(uri, serverSelectionTimeoutMS=5000)
         self.db = self.client['sixlottery_ultimate']
@@ -103,7 +98,6 @@ class DatabaseManager:
 # 🧠 MODULE 3: AI SUB-MODELS
 # ==========================================
 class PatternRecognizer:
-    """ သမိုင်းကြောင်းမှ Pattern များကို ရှာဖွေစစ်ဆေးသော အပိုင်း """
     @staticmethod
     def get_streak(sizes_list: list) -> int:
         if not sizes_list: return 0
@@ -129,7 +123,6 @@ class PatternRecognizer:
         return matches['BIG'] / total, matches['SMALL'] / total
 
 class MarkovChainModel:
-    """ ပြီးခဲ့သော ဂဏန်းအရ နောက်ထွက်မည့် ဂဏန်း၏ ရာခိုင်နှုန်းကို တွက်ချက်ခြင်း """
     @staticmethod
     def calculate_transitions(sizes: list) -> tuple:
         if len(sizes) < 2: return 0.5, 0.5
@@ -143,7 +136,6 @@ class MarkovChainModel:
         return transitions[curr]['BIG'] / tot, transitions[curr]['SMALL'] / tot
 
 class MLPredictor:
-    """ Random Forest နှင့် Gradient Boosting ကို ပေါင်းစပ်ထားသော Machine Learning အပိုင်း """
     def __init__(self):
         self.rf = RandomForestClassifier(n_estimators=100, max_depth=6, random_state=42, n_jobs=-1)
         self.gb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.05, max_depth=3, random_state=42)
@@ -178,18 +170,20 @@ class MLPredictor:
             
             return rf_b, gb_b
         except Exception as e:
-            logger.warning(f"ML Prediction Error: {e}")
             return 0.5, 0.5
 
 # ==========================================
 # ⚙️ MODULE 4: ACCURACY OPTIMIZER & MASTER AI
 # ==========================================
 class MetaOptimizer:
-    """ အခြေအနေပေါ်မူတည်၍ Algorithm များ၏ အလေးချိန် (Weights) ကို အလိုအလျောက် ပြင်ဆင်ခြင်း """
     def __init__(self):
         self.weights = {'rf': 0.30, 'gb': 0.25, 'markov': 0.20, 'pattern': 0.25}
 
     def learn_from_result(self, actual: str, past_preds: dict):
+        # 💡 [FIXED] past_preds မရှိပါက (အလွတ်ဖြစ်နေပါက) ကျော်သွားမည်
+        if not past_preds:
+            return
+
         total_w = 0.0
         for model, pred in past_preds.items():
             if pred == actual:
@@ -198,18 +192,20 @@ class MetaOptimizer:
                 self.weights[model] = max(0.05, self.weights[model] - 0.03)
             total_w += self.weights[model]
             
-        for k in self.weights:
-            self.weights[k] /= total_w
+        # 💡 [FIXED] 0 ဖြင့် စားမိခြင်းကို ကာကွယ်ထားသည်
+        if total_w > 0:
+            for k in self.weights:
+                self.weights[k] /= total_w
 
 class UltimateAIEngine:
-    """ AI Core အားလုံးကို ထိန်းချုပ်မောင်းနှင်သော အဓိက အင်ဂျင်ကြီး """
     def __init__(self):
         self.optimizer = MetaOptimizer()
         self.ml_core = MLPredictor()
         self.last_predictions = {} 
 
     def analyze_and_predict(self, docs: list, recent_preds: list) -> tuple:
-        if len(docs) < 30: return "BIG", 55.0
+        if len(docs) < 30: 
+            return "BIG", 55.0
         
         sizes = [d.get('size', 'BIG') for d in reversed(docs)]
         numbers = [int(d.get('number', 0)) for d in reversed(docs)]
@@ -232,7 +228,7 @@ class UltimateAIEngine:
         score_b = (rf_b * w['rf']) + (gb_b * w['gb']) + (mar_b * w['markov']) + (pat_b * w['pattern'])
         score_s = ((1-rf_b) * w['rf']) + ((1-gb_b) * w['gb']) + (mar_s * w['markov']) + (pat_s * w['pattern'])
         
-        # 4. Smart Streak Override (အတန်းရှည်နေပါက ချိုးမည့်အစား ဆက်လိုက်မည်)
+        # 4. Smart Streak Override
         current_streak = PatternRecognizer.get_streak(sizes)
         if current_streak >= 4:
             if sizes[-1] == 'BIG': score_b += 0.35
@@ -240,7 +236,10 @@ class UltimateAIEngine:
             
         # 5. Calculate Final Result
         final_pred = "BIG" if score_b > score_s else "SMALL"
-        raw_conf = (max(score_b, score_s) / (score_b + score_s)) * 100
+        total_score = score_b + score_s
+        
+        # 💡 [FIXED] Total Score သုညဖြစ်နေပါက (Error ဖြစ်ပါက) 50% သတ်မှတ်မည်
+        raw_conf = (max(score_b, score_s) / total_score * 100) if total_score > 0 else 50.0
         confidence = min(max(raw_conf, 51.0), 99.0)
         
         return final_pred, round(confidence, 1)
@@ -249,7 +248,6 @@ class UltimateAIEngine:
 # 💰 MODULE 5: UI & BOT MANAGER
 # ==========================================
 class TelegramUI:
-    """ Telegram သို့ မက်ဆေ့ချ်များ ပို့ခြင်းကို သီးသန့် စီမံခြင်း """
     def __init__(self, bot_instance: Bot):
         self.bot = bot_instance
 
@@ -270,7 +268,7 @@ class TelegramUI:
         res_letter = "B" if actual_size == "BIG" else "S"
         
         msg = (
-            f"<b>☘️ 𝐒𝐈𝐗-𝐋𝐎𝐓𝐓𝐄𝐑𝐘 ☘️</b>\n\n"
+            f"<b>SIX-LOTTERY</b>\n\n"
             f"⏰ Period: {issue}\n"
             f"🎯 Choice: {pred} {step}x\n"
             f"📊 Result: {icon} {win_str} | {res_letter} ({actual_num})"
@@ -279,7 +277,6 @@ class TelegramUI:
         try: 
             await self.bot.send_message(chat_id=Config.CHANNEL_ID, text=msg)
             
-            # Send Sticker
             if is_win and Config.WIN_STICKER:
                 await self.bot.send_sticker(chat_id=Config.CHANNEL_ID, sticker=Config.WIN_STICKER)
             elif not is_win and Config.LOSE_STICKER:
@@ -290,7 +287,6 @@ class TelegramUI:
 # 🚀 MODULE 6: MAIN CONTROLLER LOOP
 # ==========================================
 class GameController:
-    """ API မှ Data ယူခြင်းနှင့် AI, DB, UI တို့ကို ချိတ်ဆက်မောင်းနှင်သော အဓိက အပိုင်း """
     def __init__(self):
         self.db = DatabaseManager(Config.MONGO_URI)
         self.ai = UltimateAIEngine()
@@ -300,7 +296,6 @@ class GameController:
         self.current_step = 1
 
     async def fetch_lottery_data(self, session: aiohttp.ClientSession) -> dict:
-        # 💡 [FIXED] မှန်ကန်သော Signature နှင့် Random ကုဒ်များကို ပြန်ထည့်ထားပါသည်
         json_data = {
             'pageSize': 10, 'pageNo': 1, 'typeId': 1, 'language': 7, 
             'random': '736ea5fe7d1744008714320d2cfbbed4', 
@@ -333,7 +328,7 @@ class GameController:
                     size = "BIG" if number >= 5 else "SMALL"
                     parity = "EVEN" if number % 2 == 0 else "ODD"
                     
-                    # 1. အစပြုချိန် (Initial Start)
+                    # 1. Initial Start
                     if not self.last_issue:
                         self.last_issue = issue
                         recent_preds = await self.db.get_recent_predictions(10)
@@ -354,10 +349,11 @@ class GameController:
                         await self.ui.send_prediction(next_issue, pred, self.current_step, conf, top_model)
                         await asyncio.sleep(1.0); continue
 
-                    # 2. ပွဲစဉ်အသစ် တွေ့ရှိသောအခါ (New Issue Detected)
+                    # 2. New Issue Detected
                     if int(issue) > int(self.last_issue):
                         await self.db.save_history(issue, number, size, parity)
                         
+                        # Self Learning Update
                         self.ai.optimizer.learn_from_result(size, self.ai.last_predictions)
                         
                         recent_preds = await self.db.get_recent_predictions(1)
@@ -377,7 +373,7 @@ class GameController:
 
                         self.last_issue = issue
                         
-                        # 🎯 3. နောက်ပွဲစဉ်အတွက် ချက်ချင်း ခန့်မှန်းခြင်း
+                        # 3. Next Prediction
                         next_issue = str(int(issue) + 1)
                         docs = await self.db.get_history(500)
                         recent_preds = await self.db.get_recent_predictions(10)
